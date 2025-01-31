@@ -41,8 +41,12 @@
             background: rgba(0, 0, 0, 0.7);
             padding: 10px;
         }
+        .btn-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
         button {
-            margin-top: 20px;
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
@@ -54,10 +58,25 @@
         button:hover {
             background-color: #0056b3;
         }
+        h1, h2, p {
+            margin: 10px 0;
+        }
+        h1 {
+            font-size: 24px;
+        }
+        h2 {
+            font-size: 20px;
+        }
+        p {
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="btn-container">
+            <button onclick="toggleLanguage()">切换到英文</button>
+        </div>
         <div class="content">
             <h1 id="title">强强对决 | AI 测试对比</h1>
             <h2 id="subtitle">AI 对比介绍</h2>
@@ -68,7 +87,6 @@
                 我把它和 GorkAI 进行比较来看看到底谁更厉害。<br>
                 如果你们也有自己测试完的结果想要上传上来，那也是可以的。
             </p>
-            <button onclick="toggleLanguage()">切换到英文</button>
         </div>
         <div class="fireworks" id="fireworks"></div>
     </div>
