@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .firework {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: fade 1s forwards;
+        }
+
+        @keyframes fade {
+            to { opacity: 0; }
+        }
+
+        .text-particle {
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        let fireworkCount = 0;
+        const textCoords = [];
+        let isTextMode = false;
+
+        // 2025 数字坐标生成
+        function createTextCoordinates() {
+            const centerX = window.innerWidth/2 - 150;
+            const centerY = window.innerHeight/2;
+            
+            // 生成"2025"坐标
+            const offsets = [
+                /* 2 */ [[0,0],[30,0],[30,15],[0,30],[30,30],[0,60],[30,60]],
+                /* 0 */ [[40,0],[70,0],[70,60],[40,60],[40,0],[70,0]],
+                /* 2 */ [[80,0],[110,0],[110,15],[80,30],[110,30],[80,60],[110,60]],
+                /* 5 */ [[120,0],[150,0],[120,0],[120,30],[150,30],[150,60],[120,60]],
+                /* 新年快乐 */ 
+                [[180,20],[200,0],[220,20],[200,40]], // 新
+                [[240,0],[240,60],[270,30]],          // 年
+                [[290,0],[320,0],[305,30],[290,60]],  // 快
+                [[330,0],[360,0],[345,30],[330,60]]   // 乐
+            ];
+
+            offsets.forEach(group => {
+                group.forEach(([x, y]) => {
+                    textCoords.push({
+                        x: centerX + x,
+                        y: centerY + y - 30
+                    });
+                });
+            });
+        }
+
+        class Firework {
+            constructor(x, y, isText = false) {
+                this.x = x;
+                this.y = y;
+                this.isText = isText;
+                this.create();
+            }
+
+            create() {
+                const colors = ['ff0000', 'ffd700', '00ff00', '00ffff', 'ff00ff', 'ffa500'];
+                for(let i = 0; i < 50; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = `firework ${this.isText ? 'text-particle' : ''}`;
+                    
+                    // 设置粒子样式
+                    const angle = (Math.PI * 2 * i) / 50;
+                    const velocity = this.isText ? 2 : Math.random() * 3 + 3;
+                    const dx = Math.cos(angle) * velocity;
+                    const dy = Math.sin(angle) * velocity;
+                    
+                    particle.style.left = this.x + 'px';
+                    particle.style.top = this.y + 'px';
+                    particle.style.background = `radial-gradient(
+                        circle at 30% 30%, 
+                        #${colors[Math.floor(Math.random() * colors.length)]}, 
+                        #000
+                    )`;
+
+                    document.body.appendChild(particle);
+
+                    // 粒子动画
+                    const duration = this.isText ? 1500 : 1000;
+                    let start = Date.now();
+                    const animate = () => {
+                        let progress = (Date.now() - start) / duration;
+                        if(progress > 1) {
+                            particle.remove();
+                            return;
+                        }
+                        particle.style.transform = `translate(
+                            ${dx * progress * 100}px, 
+                            ${dy * progress * 100}px
+                        )`;
+                        particle.style.opacity = 1 - progress;
+                        requestAnimationFrame(animate);
+                    };
+                    requestAnimationFrame(animate);
+                }
+
+                if(!this.isText) {
+                    fireworkCount++;
+                    if(fireworkCount >= 15 && !isTextMode) {
+                        isTextMode = true;
+                        createTextCoordinates();
+                        startTextFireworks();
+                    }
+                }
+            }
+        }
+
+        // 文字烟花循环
+        function startTextFireworks() {
+            let index = 0;
+            function trigger() {
+                if(index >= textCoords.length) index = 0;
+                const {x, y} = textCoords[index++];
+                new Firework(x, y, true);
+                setTimeout(trigger, 50);
+            }
+            trigger();
+        }
+
+        // 初始随机烟花
+        setInterval(() => {
+            if(isTextMode) return;
+            new Firework(
+                Math.random() * window.innerWidth,
+                Math.random() * window.innerHeight
+            );
+        }, 800);
+
+        // 初始化文字坐标
+        window.addEventListener('resize', createTextCoordinates);
+        createTextCoordinates();
+    </script>
+</body>
+</html>
