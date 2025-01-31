@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>强强对决 | AI 测试对比</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        .container {
+            position: relative;
+            text-align: center;
+            color: white;
+        }
+        .fireworks {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: -1;
+        }
+        .content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .prompt {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 16px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h1 id="title">强强对决 | AI 测试对比</h1>
+            <h2 id="subtitle">AI 对比介绍</h2>
+            <p id="description">
+                大家好，这是一个介绍页面。<br>
+                我会拿两到三个 AI 进行测试对比，你们可以看一下结果。<br>
+                因为我看在推特上有很多人说他们 DeepSeek 的结果就是弄虚作假，那我就来个强强对决。<br>
+                我把它和 GorkAI 进行比较来看看到底谁更厉害。<br>
+                如果你们也有自己测试完的结果想要上传上来，那也是可以的。
+            </p>
+            <button onclick="toggleLanguage()">切换到英文</button>
+        </div>
+        <div class="fireworks" id="fireworks"></div>
+    </div>
+    <div class="prompt" id="prompt">
+        提示词（Prompt）：<br>
+        创建一个HTML网页，包含以下功能：<br>
+        页面展示绽放烟花的动画效果（例如彩色烟花呈现出逼真的爆炸效果）。<br>
+        烟花必须是拟物化风格（尽量接近真实烟花绽放的效果，如颜色渐变、散射的烟花粒子等）。<br>
+        在烟花绽放次数达到15次后（可以计数），新的烟花会变成构成“2025”字样的样式。<br>
+        在“2025”字样旁边同时显示“新年快乐”。<br>
+        字样部分的烟花仍需维持动态粒子绽放的拟物效果。<br>
+        页面背景可以是深色（如黑色或深蓝色）以便突出烟花效果。<br>
+        创建尽可能纯HTML和CSS（可以适当借用JavaScript实现烟花动画和计数逻辑）。<br>
+        基于这个提示词，会涉及HTML结构、CSS样式、JavaScript动画三个主要部分。<br>
+        <br>
+        Prompt:<br>
+        Create an HTML page containing the following features:<br>
+        The page displays an animation of fireworks (e.g., colorful fireworks presenting a realistic explosion effect).<br>
+        The fireworks must be in a skeuomorphic style (as close to the real fireworks display effect as possible, such as color gradients, scattered firework particles, etc.).<br>
+        After 15 fireworks displays (can be counted), new fireworks will form the pattern of "2025".<br>
+        "Happy New Year" is displayed next to the "2025" pattern.<br>
+        The fireworks in the text part need to maintain the dynamic particle display skeuomorphic effect.<br>
+        The page background can be dark (such as black or dark blue) to highlight the fireworks effect.<br>
+        Create with pure HTML and CSS as much as possible (you can borrow JavaScript to achieve firework animation and counting logic).<br>
+        Based on this prompt, it will involve three main parts: HTML structure, CSS style, and JavaScript animation.
+    </div>
+
+    <script>
+        let isChinese = true;
+        let fireworkCount = 0;
+
+        function toggleLanguage() {
+            if (isChinese) {
+                document.getElementById('title').innerText = 'AI Battle | Testing Comparison';
+                document.getElementById('subtitle').innerText = 'Introduction of AI Battle';
+                document.getElementById('description').innerHTML = `
+                    Hello everyone, this is an introduction page.<br>
+                    I will compare two or three AIs to test and you can check the results.<br>
+                    I've seen many people on Twitter saying DeepSeek's results are fake, so here comes a "head-to-head battle".<br>
+                    I'll compare it with GorkAI to see which one is stronger.<br>
+                    If you also have your own test results and want to upload them, that’s totally acceptable.
+                `;
+                document.querySelector('button').innerText = 'Switch to Chinese';
+                document.getElementById('prompt').innerHTML = `
+                    Prompt:<br>
+                    Create an HTML page containing the following features:<br>
+                    The page displays an animation of fireworks (e.g., colorful fireworks presenting a realistic explosion effect).<br>
+                    The fireworks must be in a skeuomorphic style (as close to the real fireworks display effect as possible, such as color gradients, scattered firework particles, etc.).<br>
+                    After 15 fireworks displays (can be counted), new fireworks will form the pattern of "2025".<br>
+                    "Happy New Year" is displayed next to the "2025" pattern.<br>
+                    The fireworks in the text part need to maintain the dynamic particle display skeuomorphic effect.<br>
+                    The page background can be dark (such as black or dark blue) to highlight the fireworks effect.<br>
+                    Create with pure HTML and CSS as much as possible (you can borrow JavaScript to achieve firework animation and counting logic).<br>
+                    Based on this prompt, it will involve three main parts: HTML structure, CSS style, and JavaScript animation.
+                `;
+            } else {
+                document.getElementById('title').innerText = '强强对决 | AI 测试对比';
+                document.getElementById('subtitle').innerText = 'AI 对比介绍';
+                document.getElementById('description').innerHTML = `
+                    大家好，这是一个介绍页面。<br>
+                    我会拿两到三个 AI 进行测试对比，你们可以看一下结果。<br>
+                    因为我看在推特上有很多人说他们 DeepSeek 的结果就是弄虚作假，那我就来个强强对决。<br>
+                    我把它和 GorkAI 进行比较来看看到底谁更厉害。<br>
+                    如果你们也有自己测试完的结果想要上传上来，那也是可以的。
+                `;
+                document.querySelector('button').innerText = '切换到英文';
+                document.getElementById('prompt').innerHTML = `
+                    提示词（Prompt）：<br>
+                    创建一个HTML网页，包含以下功能：<br>
+                    页面展示绽放烟花的动画效果（例如彩色烟花呈现出逼真的爆炸效果）。<br>
+                    烟花必须是拟物化风格（尽量接近真实烟花绽放的效果，如颜色渐变、散射的烟花粒子等）。<br>
+                    在烟花绽放次数达到15次后（可以计数），新的烟花会变成构成“2025”字样的样式。<br>
+                    在“2025”字样旁边同时显示“新年快乐”。<br>
+                    字样部分的烟花仍需维持动态粒子绽放的拟物效果。<br>
+                    页面背景可以是深色（如黑色或深蓝色）以便突出烟花效果。<br>
+                    创建尽可能纯HTML和CSS（可以适当借用JavaScript实现烟花动画和计数逻辑）。<br>
+                    基于这个提示词，会涉及HTML结构、CSS样式、JavaScript动画三个主要部分。
+                `;
+            }
+            isChinese = !isChinese;
+        }
+
+        function createFirework() {
+            const firework = document.createElement('div');
+            firework.classList.add('firework');
+            firework.style.left = `${Math.random() * 100}%`;
+            firework.style.animationDuration = `${Math.random() * 2 + 3}s`;
+
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            firework.style.backgroundColor = color;
+
+            document.getElementById('fireworks').appendChild(firework);
+
+            setTimeout(() => {
+                firework.remove();
+                fireworkCount++;
+                if (fireworkCount === 15) {
+                    createSpecialFirework();
+                }
+            }, 5000);
+        }
+
+        function createSpecialFirework() {
+            const specialFirework = document.createElement('div');
+            specialFirework.classList.add('special-firework');
+            specialFirework.innerHTML = '2025<br>新年快乐';
+            document.getElementById('fireworks').appendChild(specialFirework);
+        }
+
+        setInterval(createFirework, 1000);
+    </script>
+</body>
+</html>
