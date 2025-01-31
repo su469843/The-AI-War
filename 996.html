@@ -17,7 +17,7 @@
       color: #555;
     }
     .container {
-      display: none;
+      display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
@@ -45,6 +45,10 @@
       border-radius: 5px;
       cursor: pointer;
     }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
     button:active {
       transform: scale(0.95);
     }
@@ -59,85 +63,71 @@
       font-size: 18px;
       font-weight: bold;
     }
+    .password-form {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .password-form input {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .password-form button {
+      margin-left: 10px;
+    }
     footer {
       text-align: center;
       margin-top: 40px;
       font-size: 14px;
       color: #777;
     }
-    #password-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      margin-top: 50px;
-    }
-    #password-input {
-      padding: 10px;
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/2.4.2/sha256.js"></script>
 </head>
 <body>
   <h1>AI 对话与失败记录</h1>
 
-  <div id="password-container">
-    <input type="password" id="password-input" placeholder="输入密码">
-    <button onclick="verifyPassword()">提交</button>
-  </div>
-
   <div class="container">
+    <!-- 密码输入表单 -->
+    <div class="password-form" id="password-form">
+      <input type="password" id="password-input" placeholder="输入密码">
+      <button onclick="checkPassword()">解锁编辑</button>
+    </div>
+
     <!-- AI1 记录区 -->
     <div class="ai-counter" id="ai1-counter">
-      <h2>AI 1</h2>
-      <button onclick="recordInteraction('ai1')">记录对话次数</button>
-      <button onclick="recordFailure('ai1')" class="secondary">记录失败次数</button>
+      <h2>Gork2</h2>
+      <button onclick="recordInteraction('ai1')" id="ai1-interact" disabled>记录对话次数</button>
+      <button onclick="recordFailure('ai1')" class="secondary" id="ai1-failure" disabled>记录失败次数</button>
       <p class="stats" id="ai1-stats">对话次数: 0 | 失败次数: 0</p>
     </div>
 
     <!-- AI2 记录区 -->
     <div class="ai-counter" id="ai2-counter">
-      <h2>AI 2</h2>
-      <button onclick="recordInteraction('ai2')">记录对话次数</button>
-      <button onclick="recordFailure('ai2')" class="secondary">记录失败次数</button>
+      <h2>DeepSeek-V3</h2>
+      <button onclick="recordInteraction('ai2')" id="ai2-interact" disabled>记录对话次数</button>
+      <button onclick="recordFailure('ai2')" class="secondary" id="ai2-failure" disabled>记录失败次数</button>
       <p class="stats" id="ai2-stats">对话次数: 0 | 失败次数: 0</p>
     </div>
 
     <!-- 重置按钮 -->
-    <button onclick="resetRecords()" class="reset" style="margin-top: 20px;">重置记录</button>
+    <button onclick="resetRecords()" class="reset" id="reset-button" disabled style="margin-top: 20px;">重置记录</button>
   </div>
 
   <!-- 签名区域 -->
   <footer>
-    由 <strong>GPT-4o 制作</strong> 😊
+    由 <strong>DeepSeek-V3 制作</strong> 😊
   </footer>
 
   <script>
-    // 正确的哈希密码
-    const hashedPassword = '9d1b2cfb7e82b1d69d13f4a1b1d3c4e1f5c6a7d8e9b0c3d4e5f6a7d8e9b0c3d4';
-
-    function verifyPassword() {
-      const password = document.getElementById('password-input').value;
-      const shaObj = new jsSHA("SHA-256", "TEXT");
-      shaObj.update(password);
-      const hash = shaObj.getHash("HEX");
-
-      if (hash === hashedPassword) {
-        document.getElementById('password-container').style.display = 'none';
-        document.querySelector('.container').style.display = 'flex';
-      } else {
-        alert('密码错误，请重试。');
-      }
-    }
-
     // 初始化数据
     const aiDataKey = 'aiRecords'; // localStorage 的键名
+    const passwordKey = 'aiPasswordHash'; // 密码哈希的键名
     let aiRecords = {
       ai1: { interactions: 0, failures: 0 },
       ai2: { interactions: 0, failures: 0 },
     };
+    let isUnlocked = false; // 是否已解锁编辑
 
     // 从 localStorage 加载数据
     function loadRecords() {
@@ -161,6 +151,7 @@
 
     // 记录对话次数
     function recordInteraction(aiId) {
+      if (!isUnlocked) return; // 未解锁时不能操作
       aiRecords[aiId].interactions++;
       saveRecords(); // 保存到 localStorage
       updateStats(); // 更新界面
@@ -168,6 +159,7 @@
 
     // 记录失败次数
     function recordFailure(aiId) {
+      if (!isUnlocked) return; // 未解锁时不能操作
       aiRecords[aiId].failures++;
       saveRecords(); // 保存到 localStorage
       updateStats(); // 更新界面
@@ -175,12 +167,55 @@
 
     // 重置所有记录
     function resetRecords() {
+      if (!isUnlocked) return; // 未解锁时不能操作
       aiRecords = {
         ai1: { interactions: 0, failures: 0 },
         ai2: { interactions: 0, failures: 0 },
       };
       saveRecords(); // 保存重置后的数据到 localStorage
       updateStats(); // 更新界面
+    }
+
+    // 哈希函数（SHA-256）
+    async function hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+    }
+
+    // 检查密码
+    async function checkPassword() {
+      const input = document.getElementById('password-input').value;
+      const storedHash = localStorage.getItem(passwordKey);
+
+      if (!storedHash) {
+        // 如果没有存储密码，设置新密码
+        const hash = await hashPassword(input);
+        localStorage.setItem(passwordKey, hash);
+        alert('密码已设置！');
+        unlockInterface();
+      } else {
+        // 验证密码
+        const inputHash = await hashPassword(input);
+        if (inputHash === storedHash) {
+          alert('密码正确，已解锁编辑功能！');
+          unlockInterface();
+        } else {
+          alert('密码错误！');
+        }
+      }
+    }
+
+    // 解锁编辑功能
+    function unlockInterface() {
+      isUnlocked = true;
+      document.getElementById('ai1-interact').disabled = false;
+      document.getElementById('ai1-failure').disabled = false;
+      document.getElementById('ai2-interact').disabled = false;
+      document.getElementById('ai2-failure').disabled = false;
+      document.getElementById('reset-button').disabled = false;
     }
 
     // 页面加载时初始化
