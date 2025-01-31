@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 对话与失败记录</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #555;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    .ai-counter {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:active {
+      transform: scale(0.95);
+    }
+    button.secondary {
+      background-color: #6c757d;
+    }
+    button.reset {
+      background-color: #dc3545;
+    }
+    .stats {
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 14px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI 对话与失败记录</h1>
+
+  <div class="container">
+    <!-- AI1 记录区 -->
+    <div class="ai-counter" id="ai1-counter">
+      <h2>AI 1</h2>
+      <button onclick="recordInteraction('ai1')">记录对话次数</button>
+      <button onclick="recordFailure('ai1')" class="secondary">记录失败次数</button>
+      <p class="stats" id="ai1-stats">对话次数: 0 | 失败次数: 0</p>
+    </div>
+
+    <!-- AI2 记录区 -->
+    <div class="ai-counter" id="ai2-counter">
+      <h2>AI 2</h2>
+      <button onclick="recordInteraction('ai2')">记录对话次数</button>
+      <button onclick="recordFailure('ai2')" class="secondary">记录失败次数</button>
+      <p class="stats" id="ai2-stats">对话次数: 0 | 失败次数: 0</p>
+    </div>
+
+    <!-- 重置按钮 -->
+    <button onclick="resetRecords()" class="reset" style="margin-top: 20px;">重置记录</button>
+  </div>
+
+  <!-- 签名区域 -->
+  <footer>
+    由 <strong>GPT-4o 制作</strong> 😊
+  </footer>
+
+  <script>
+    // 初始化数据
+    const aiDataKey = 'aiRecords'; // localStorage 的键名
+    let aiRecords = {
+      ai1: { interactions: 0, failures: 0 },
+      ai2: { interactions: 0, failures: 0 },
+    };
+
+    // 从 localStorage 加载数据
+    function loadRecords() {
+      const storedData = localStorage.getItem(aiDataKey);
+      if (storedData) {
+        aiRecords = JSON.parse(storedData); // 如果有存储数据，解析后加载
+      }
+      updateStats(); // 更新界面
+    }
+
+    // 更新 localStorage 记录
+    function saveRecords() {
+      localStorage.setItem(aiDataKey, JSON.stringify(aiRecords)); // 将对象转换为 JSON 字符串再保存
+    }
+
+    // 更新页面上的统计信息
+    function updateStats() {
+      document.getElementById('ai1-stats').innerText = `对话次数: ${aiRecords.ai1.interactions} | 失败次数: ${aiRecords.ai1.failures}`;
+      document.getElementById('ai2-stats').innerText = `对话次数: ${aiRecords.ai2.interactions} | 失败次数: ${aiRecords.ai2.failures}`;
+    }
+
+    // 记录对话次数
+    function recordInteraction(aiId) {
+      aiRecords[aiId].interactions++;
+      saveRecords(); // 保存到 localStorage
+      updateStats(); // 更新界面
+    }
+
+    // 记录失败次数
+    function recordFailure(aiId) {
+      aiRecords[aiId].failures++;
+      saveRecords(); // 保存到 localStorage
+      updateStats(); // 更新界面
+    }
+
+    // 重置所有记录
+    function resetRecords() {
+      aiRecords = {
+        ai1: { interactions: 0, failures: 0 },
+        ai2: { interactions: 0, failures: 0 },
+      };
+      saveRecords(); // 保存重置后的数据到 localStorage
+      updateStats(); // 更新界面
+    }
+
+    // 页面加载时初始化
+    loadRecords();
+  </script>
+</body>
+</html>
