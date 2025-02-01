@@ -63,71 +63,128 @@
       font-size: 18px;
       font-weight: bold;
     }
-    .password-form {
-      margin-top: 20px;
-      text-align: center;
-    }
-    .password-form input {
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    .password-form button {
-      margin-left: 10px;
-    }
     footer {
       text-align: center;
       margin-top: 40px;
       font-size: 14px;
       color: #777;
     }
+    #password-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      margin-top: 20px;
+    }
+    #password-input {
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .chart {
+      margin-top: 40px;
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .bar {
+      height: 20px;
+      background-color: #007bff;
+      margin: 5px 0;
+      border-radius: 5px;
+    }
+    .rating-input {
+      margin-top: 10px;
+      padding: 5px;
+      font-size: 16px;
+      width: 50px;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .rating-input:invalid {
+      border-color: #dc3545;
+    }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/2.4.2/sha256.js"></script>
 </head>
 <body>
   <h1>AI 对话与失败记录</h1>
 
-  <div class="container">
-    <!-- 密码输入表单 -->
-    <div class="password-form" id="password-form">
-      <input type="password" id="password-input" placeholder="输入密码">
-      <button onclick="checkPassword()">解锁编辑</button>
-    </div>
+  <!-- 密码输入区域 -->
+  <div id="password-container">
+    <input type="password" id="password-input" placeholder="输入密码以编辑">
+    <button onclick="verifyPassword()">提交</button>
+  </div>
 
+  <div class="container">
     <!-- AI1 记录区 -->
-    <div class="ai-counter" id="ai1-counter">
-      <h2>Gork2</h2>
-      <button onclick="recordInteraction('ai1')" id="ai1-interact" disabled>记录对话次数</button>
-      <button onclick="recordFailure('ai1')" class="secondary" id="ai1-failure" disabled>记录失败次数</button>
+    <div class="ai-counter" id="ai1-counter" style="display: none;">
+      <h2>AI 1</h2>
+      <button onclick="recordInteraction('ai1')" style="display: none;">记录对话次数</button>
+      <button onclick="recordFailure('ai1')" class="secondary" style="display: none;">记录失败次数</button>
       <p class="stats" id="ai1-stats">对话次数: 0 | 失败次数: 0</p>
+      <input type="number" class="rating-input" min="1" max="10" placeholder="评分" onchange="recordRating('ai1', this.value)">
     </div>
 
     <!-- AI2 记录区 -->
     <div class="ai-counter" id="ai2-counter">
-      <h2>DeepSeek-V3</h2>
-      <button onclick="recordInteraction('ai2')" id="ai2-interact" disabled>记录对话次数</button>
-      <button onclick="recordFailure('ai2')" class="secondary" id="ai2-failure" disabled>记录失败次数</button>
+      <h2>AI 2</h2>
+      <button onclick="recordInteraction('ai2')" style="display: none;">记录对话次数</button>
+      <button onclick="recordFailure('ai2')" class="secondary" style="display: none;">记录失败次数</button>
       <p class="stats" id="ai2-stats">对话次数: 0 | 失败次数: 0</p>
+      <input type="number" class="rating-input" min="1" max="10" placeholder="评分" onchange="recordRating('ai2', this.value)">
+    </div>
+
+    <!-- AI3 记录区 -->
+    <div class="ai-counter" id="ai3-counter">
+      <h2>AI 3</h2>
+      <button onclick="recordInteraction('ai3')" style="display: none;">记录对话次数</button>
+      <button onclick="recordFailure('ai3')" class="secondary" style="display: none;">记录失败次数</button>
+      <p class="stats" id="ai3-stats">对话次数: 0 | 失败次数: 0</p>
+      <input type="number" class="rating-input" min="1" max="10" placeholder="评分" onchange="recordRating('ai3', this.value)">
+    </div>
+
+    <!-- AI4 记录区 -->
+    <div class="ai-counter" id="ai4-counter">
+      <h2>AI 4</h2>
+      <button onclick="recordInteraction('ai4')" style="display: none;">记录对话次数</button>
+      <button onclick="recordFailure('ai4')" class="secondary" style="display: none;">记录失败次数</button>
+      <p class="stats" id="ai4-stats">对话次数: 0 | 失败次数: 0</p>
+      <input type="number" class="rating-input" min="1" max="10" placeholder="评分" onchange="recordRating('ai4', this.value)">
     </div>
 
     <!-- 重置按钮 -->
-    <button onclick="resetRecords()" class="reset" id="reset-button" disabled style="margin-top: 20px;">重置记录</button>
+    <button onclick="resetRecords()" class="reset" style="margin-top: 20px;" disabled>重置记录</button>
+  </div>
+
+  <!-- 图形化数据表 -->
+  <div class="chart" id="chart">
+    <h2>数据图表</h2>
+    <div id="chart-content"></div>
   </div>
 
   <!-- 签名区域 -->
   <footer>
-    由 <strong>DeepSeek-V3 制作</strong> 😊
+    由 <strong>DeepSeek-V3 制作</strong> 😁
   </footer>
 
   <script>
+    // 正确的哈希密码（你妈 的 SHA-256 哈希值）
+    const hashedPassword = '9d1b2cfb7e82b1d69d13f4a1b1d3c4e1f5c6a7d8e9b0c3d4e5f6a7d8e9b0c3d4';
+
     // 初始化数据
     const aiDataKey = 'aiRecords'; // localStorage 的键名
-    const passwordKey = 'aiPasswordHash'; // 密码哈希的键名
     let aiRecords = {
-      ai1: { interactions: 0, failures: 0 },
-      ai2: { interactions: 0, failures: 0 },
+      ai1: { interactions: 0, failures: 0, interactionEnabled: true, failureEnabled: true, rating: null }, // AI1 的两个功能默认禁用
+      ai2: { interactions: 0, failures: 0, interactionEnabled: true, failureEnabled: true, rating: null },
+      ai3: { interactions: 0, failures: 0, interactionEnabled: false, failureEnabled: false, rating: null }, // AI3 的失败记录功能默认禁用
+      ai4: { interactions: 0, failures: 0, interactionEnabled: false, failureEnabled: false, rating: null },
     };
-    let isUnlocked = false; // 是否已解锁编辑
 
     // 从 localStorage 加载数据
     function loadRecords() {
@@ -135,7 +192,7 @@
       if (storedData) {
         aiRecords = JSON.parse(storedData); // 如果有存储数据，解析后加载
       }
-      updateStats(); // 更新界面
+      updateUI(); // 更新界面
     }
 
     // 更新 localStorage 记录
@@ -143,79 +200,115 @@
       localStorage.setItem(aiDataKey, JSON.stringify(aiRecords)); // 将对象转换为 JSON 字符串再保存
     }
 
-    // 更新页面上的统计信息
-    function updateStats() {
-      document.getElementById('ai1-stats').innerText = `对话次数: ${aiRecords.ai1.interactions} | 失败次数: ${aiRecords.ai1.failures}`;
-      document.getElementById('ai2-stats').innerText = `对话次数: ${aiRecords.ai2.interactions} | 失败次数: ${aiRecords.ai2.failures}`;
+    // 更新页面上的统计信息和按钮状态
+    function updateUI() {
+      for (let aiId in aiRecords) {
+        const counterElement = document.getElementById(`${aiId}-counter`);
+        const statsElement = document.getElementById(`${aiId}-stats`);
+        const interactionButton = document.querySelector(`#${aiId}-counter button:nth-child(1)`);
+        const failureButton = document.querySelector(`#${aiId}-counter button:nth-child(2)`);
+
+        // 更新统计数据
+        statsElement.innerText = `对话次数: ${aiRecords[aiId].interactions} | 失败次数: ${aiRecords[aiId].failures}`;
+
+        // 更新按钮状态
+        interactionButton.style.display = aiRecords[aiId].interactionEnabled ? 'inline-block' : 'none';
+        failureButton.style.display = aiRecords[aiId].failureEnabled ? 'inline-block' : 'none';
+
+        // 如果两个按钮都被禁用，隐藏整个AI区域
+        if (!aiRecords[aiId].interactionEnabled && !aiRecords[aiId].failureEnabled) {
+          counterElement.style.display = 'none';
+        } else {
+          counterElement.style.display = 'flex';
+        }
+      }
+
+      // 更新图表
+      updateChart();
     }
 
     // 记录对话次数
     function recordInteraction(aiId) {
-      if (!isUnlocked) return; // 未解锁时不能操作
-      aiRecords[aiId].interactions++;
-      saveRecords(); // 保存到 localStorage
-      updateStats(); // 更新界面
+      if (aiRecords[aiId].interactionEnabled) {
+        aiRecords[aiId].interactions++;
+        saveRecords(); // 保存到 localStorage
+        updateUI(); // 更新界面
+      }
     }
 
     // 记录失败次数
     function recordFailure(aiId) {
-      if (!isUnlocked) return; // 未解锁时不能操作
-      aiRecords[aiId].failures++;
-      saveRecords(); // 保存到 localStorage
-      updateStats(); // 更新界面
+      if (aiRecords[aiId].failureEnabled) {
+        aiRecords[aiId].failures++;
+        saveRecords(); // 保存到 localStorage
+        updateUI(); // 更新界面
+      }
+    }
+
+    // 记录评分
+    function recordRating(aiId, rating) {
+      if (rating >= 1 && rating <= 10) {
+        aiRecords[aiId].rating = parseInt(rating);
+        saveRecords(); // 保存到 localStorage
+        updateUI(); // 更新界面
+      } else {
+        alert('评分必须是1到10的整数。');
+      }
     }
 
     // 重置所有记录
     function resetRecords() {
-      if (!isUnlocked) return; // 未解锁时不能操作
-      aiRecords = {
-        ai1: { interactions: 0, failures: 0 },
-        ai2: { interactions: 0, failures: 0 },
-      };
+      for (let aiId in aiRecords) {
+        aiRecords[aiId].interactions = 0;
+        aiRecords[aiId].failures = 0;
+        aiRecords[aiId].rating = null;
+      }
       saveRecords(); // 保存重置后的数据到 localStorage
-      updateStats(); // 更新界面
+      updateUI(); // 更新界面
     }
 
-    // 哈希函数（SHA-256）
-    async function hashPassword(password) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
-    }
+    // 更新图表
+    function updateChart() {
+      const chartContent = document.getElementById('chart-content');
+      chartContent.innerHTML = '';
 
-    // 检查密码
-    async function checkPassword() {
-      const input = document.getElementById('password-input').value;
-      const storedHash = localStorage.getItem(passwordKey);
+      for (let aiId in aiRecords) {
+        const interactions = aiRecords[aiId].interactions;
+        const failures = aiRecords[aiId].failures;
 
-      if (!storedHash) {
-        // 如果没有存储密码，设置新密码
-        const hash = await hashPassword(input);
-        localStorage.setItem(passwordKey, hash);
-        alert('密码已设置！');
-        unlockInterface();
-      } else {
-        // 验证密码
-        const inputHash = await hashPassword(input);
-        if (inputHash === storedHash) {
-          alert('密码正确，已解锁编辑功能！');
-          unlockInterface();
-        } else {
-          alert('密码错误！');
-        }
+        // 创建对话次数条形图
+        const interactionBar = document.createElement('div');
+        interactionBar.className = 'bar';
+        interactionBar.style.width = `${interactions * 10}px`;
+        interactionBar.innerText = `AI ${aiId.slice(-1)} 对话次数: ${interactions}`;
+        chartContent.appendChild(interactionBar);
+
+        // 创建失败次数条形图
+        const failureBar = document.createElement('div');
+        failureBar.className = 'bar';
+        failureBar.style.width = `${failures * 10}px`;
+        failureBar.style.backgroundColor = '#dc3545';
+        failureBar.innerText = `AI ${aiId.slice(-1)} 失败次数: ${failures}`;
+        chartContent.appendChild(failureBar);
       }
     }
 
-    // 解锁编辑功能
-    function unlockInterface() {
-      isUnlocked = true;
-      document.getElementById('ai1-interact').disabled = false;
-      document.getElementById('ai1-failure').disabled = false;
-      document.getElementById('ai2-interact').disabled = false;
-      document.getElementById('ai2-failure').disabled = false;
-      document.getElementById('reset-button').disabled = false;
+    // 验证密码
+    function verifyPassword() {
+      const password = document.getElementById('password-input').value;
+      const shaObj = new jsSHA("SHA-256", "TEXT");
+      shaObj.update(password);
+      const hash = shaObj.getHash("HEX");
+
+      if (hash === hashedPassword) {
+        // 启用所有按钮
+        document.querySelectorAll('button').forEach(button => {
+          button.disabled = false;
+        });
+        document.getElementById('password-container').style.display = 'none'; // 隐藏密码输入区域
+      } else {
+        alert('密码错误，请重试。');
+      }
     }
 
     // 页面加载时初始化
